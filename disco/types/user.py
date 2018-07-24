@@ -7,7 +7,7 @@ DefaultAvatars = Enum(
     GREY=1,
     GREEN=2,
     ORANGE=3,
-    RED=4,
+    RED=4
 )
 
 
@@ -30,7 +30,7 @@ class User(SlottedModel, with_equality('id'), with_hash('id')):
             self.id,
             self.avatar,
             fmt,
-            size,
+            size
         )
 
     @property
@@ -59,7 +59,7 @@ GameType = Enum(
     DEFAULT=0,
     STREAMING=1,
     LISTENING=2,
-    WATCHING=3,
+    WATCHING=3
 )
 
 Status = Enum(
@@ -67,7 +67,7 @@ Status = Enum(
     'IDLE',
     'DND',
     'INVISIBLE',
-    'OFFLINE',
+    'OFFLINE'
 )
 
 
