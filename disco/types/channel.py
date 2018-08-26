@@ -24,7 +24,7 @@ ChannelType = Enum(
 
 PermissionOverwriteType = Enum(
     ROLE='role',
-    MEMBER='member'
+    MEMBER='member',
 )
 
 
@@ -69,7 +69,7 @@ class PermissionOverwrite(ChannelSubType):
             type=ptype,
             allow=allow,
             deny=deny,
-            channel_id=channel.id
+            channel_id=channel.id,
         ).save()
 
     @property
@@ -139,7 +139,7 @@ class Channel(SlottedModel, Permissible):
         self.attach(six.itervalues(self.overwrites), {'channel_id': self.id, 'channel': self})
 
     def __str__(self):
-        return u'#{}'.format(self.name)
+        return u'#{}'.format(self.name) if self.name else six.text_type(self.id)
 
     def __repr__(self):
         return u'<Channel {} ({})>'.format(self.id, self)
@@ -159,12 +159,18 @@ class Channel(SlottedModel, Permissible):
         member = self.guild.get_member(user)
         base = self.guild.get_permissions(member)
 
-        for ow in six.itervalues(self.overwrites):
-            if ow.id != user.id and ow.id not in member.roles:
-                continue
+        ow_everyone = self.overwrites.get(self.guild_id)
+        if ow_everyone:
+            base += ow_everyone.compiled
 
-            base -= ow.deny
-            base += ow.allow
+        for role_id in member.roles:
+            ow_role = self.overwrites.get(role_id)
+            if ow_role:
+                base += ow_role.compiled
+
+        ow_member = self.overwrites.get(member.user.id)
+        if ow_member:
+            base += ow_member.compiled
 
         return base
 
@@ -328,6 +334,13 @@ class Channel(SlottedModel, Permissible):
         """
         return self.client.api.channels_messages_create(self.id, *args, **kwargs)
 
+    def send_typing(self):
+        """
+        Sends a typing event to this channel. See `APIClient.channels_typing`
+        for more information.
+        """
+        self.client.api.channels_typing(self.id)
+
     def connect(self, *args, **kwargs):
         """
         Connect to this channel over voice.
@@ -381,7 +394,7 @@ class Channel(SlottedModel, Permissible):
                 self.delete_message(msg)
 
     def delete(self, **kwargs):
-        assert (self.is_dm or self.guild.can(self.client.state.me, Permissions.MANAGE_GUILD)), 'Invalid Permissions'
+        assert (self.is_dm or self.guild.can(self.client.state.me, Permissions.MANAGE_CHANNELS)), 'Invalid Permissions'
         self.client.api.channels_delete(self.id, **kwargs)
 
     def close(self):
@@ -441,6 +454,34 @@ class Channel(SlottedModel, Permissible):
             parent_id=to_snowflake(parent) if parent else parent,
             reason=reason)
 
+    def create_text_channel(self, *args, **kwargs):
+        """
+        Creates a sub-text-channel in this category. See `Guild.create_text_channel`
+        for arguments and more information.
+        """
+        if self.type != ChannelType.GUILD_CATEGORY:
+            raise ValueError('Cannot create a sub-channel on a non-category channel')
+
+        kwargs['parent_id'] = self.id
+        return self.guild.create_text_channel(
+            *args,
+            **kwargs
+        )
+
+    def create_voice_channel(self, *args, **kwargs):
+        """
+        Creates a sub-voice-channel in this category. See `Guild.create_voice_channel`
+        for arguments and more information.
+        """
+        if self.type != ChannelType.GUILD_CATEGORY:
+            raise ValueError('Cannot create a sub-channel on a non-category channel')
+
+        kwargs['parent_id'] = self.id
+        return self.guild.create_voice_channel(
+            *args,
+            **kwargs
+        )
+
 
 class MessageIterator(object):
     """
@@ -478,12 +519,14 @@ class MessageIterator(object):
         self.last = None
         self._buffer = []
 
-        if not any((before, after)) and self.direction == self.Direction.DOWN:
+        if before is None and after is None and self.direction == self.Direction.DOWN:
             raise Exception('Must specify either before or after for downward seeking')
 
     def fill(self):
         """
         Fills the internal buffer up with :class:`disco.types.message.Message` objects from the API.
+
+        Returns a boolean indicating whether items were added to the buffer.
         """
         self._buffer = self.client.api.channels_messages_list(
             self.channel.id,
@@ -492,7 +535,7 @@ class MessageIterator(object):
             limit=self.chunk_size)
 
         if not len(self._buffer):
-            return
+            return False
 
         self.after = None
         self.before = None
@@ -504,6 +547,8 @@ class MessageIterator(object):
             self._buffer.reverse()
             self.after = self._buffer[-1].id
 
+        return True
+
     def next(self):
         return self.__next__()
 
@@ -512,7 +557,9 @@ class MessageIterator(object):
 
     def __next__(self):
         if not len(self._buffer):
-            self.fill()
+            filled = self.fill()
+            if not filled:
+                raise StopIteration
 
         if self.bulk:
             res = self._buffer
