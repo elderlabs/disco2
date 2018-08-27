@@ -1,4 +1,5 @@
-Don't use this master branch, use [this one](https://github.com/elderlabs/disco/tree/530a79f) instead (branch 530a79f). Don't ask why, but bug.
+# Don't use this master branch, use [this one](https://github.com/elderlabs/disco/tree/530a79f) instead. 
+**Don't ask why, but bug, so branch 530a79f is maintained.**
 
 # disco
 
