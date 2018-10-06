@@ -29,7 +29,7 @@ class User(SlottedModel, with_equality('id'), with_hash('id')):
             return 'https://cdn.discordapp.com/avatars/{}/{}.gif?size={}'.format(self.id, self.avatar, size)
         else:
             if fmt is None:
-                fmt='webp'
+                fmt = 'webp'
             return 'https://cdn.discordapp.com/avatars/{}/{}.{}?size={}'.format(self.id, self.avatar, fmt, size)
 
     @property
