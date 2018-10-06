@@ -22,16 +22,13 @@ class User(SlottedModel, with_equality('id'), with_hash('id')):
 
     presence = Field(None)
 
-    def get_avatar_url(self, fmt='webp', size=1024):
+    def get_avatar_url(self):
         if not self.avatar:
             return 'https://cdn.discordapp.com/embed/avatars/{}.png'.format(self.default_avatar.value)
-
-        return 'https://cdn.discordapp.com/avatars/{}/{}.{}?size={}'.format(
-            self.id,
-            self.avatar,
-            fmt,
-            size
-        )
+        elif self.avatar.startswith('a_'):
+            return 'https://cdn.discordapp.com/avatars/{}/{}.gif'.format(self.id, self.avatar)
+        else:
+            return 'https://cdn.discordapp.com/avatars/{}/{}.png'.format(self.id, self.avatar)
 
     @property
     def default_avatar(self):
