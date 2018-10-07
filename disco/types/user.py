@@ -25,12 +25,12 @@ class User(SlottedModel, with_equality('id'), with_hash('id')):
     def get_avatar_url(self, fmt=None, size=1024):
         if not self.avatar:
             return 'https://cdn.discordapp.com/embed/avatars/{}.png'.format(self.default_avatar.value)
-        elif self.avatar.startswith('a_') and fmt is None:
+        if fmt is not None:
+            return 'https://cdn.discordapp.com/avatars/{}/{}.{}?size={}'.format(self.id, self.avatar, fmt, size)
+        if self.avatar.startswith('a_'):
             return 'https://cdn.discordapp.com/avatars/{}/{}.gif?size={}'.format(self.id, self.avatar, size)
         else:
-            if fmt is None:
-                fmt = 'webp'
-            return 'https://cdn.discordapp.com/avatars/{}/{}.{}?size={}'.format(self.id, self.avatar, fmt, size)
+            return 'https://cdn.discordapp.com/avatars/{}/{}.webp?size={}'.format(self.id, self.avatar, size)
 
     @property
     def default_avatar(self):
