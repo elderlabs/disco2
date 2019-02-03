@@ -163,7 +163,8 @@ class Command(object):
     def get_docstring(self):
         return (self.func.__doc__ or '').format(**self.context)
 
-    def update(self,
+    def update(
+            self,
             args=None,
             level=None,
             aliases=None,
@@ -266,7 +267,7 @@ class Command(object):
                     group = self.group + ' '
             return ('^{}({})' if grouped else '^{}(?:{})').format(
                 group,
-                '|'.join(self.triggers)
+                '|'.join(self.triggers),
             ) + (ARGS_REGEX if grouped else ARGS_UNGROUPED_REGEX)
 
     def execute(self, event):
@@ -283,11 +284,11 @@ class Command(object):
 
         if self.args:
             if len(event.args) < self.args.required_length:
-                raise CommandError(u'Command {} requires {} arguments (`{}`) passed {}'.format(
+                raise CommandError(u'Command {} requires {} argument(s) (`{}`) passed {}'.format(
                     event.name,
                     self.args.required_length,
                     self.raw_args,
-                    len(event.args)
+                    len(event.args),
                 ))
 
             try:
