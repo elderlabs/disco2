@@ -11,7 +11,7 @@ from disco.util.hashmap import HashMap
 
 DATETIME_FORMATS = [
     '%Y-%m-%dT%H:%M:%S.%f',
-    '%Y-%m-%dT%H:%M:%S'
+    '%Y-%m-%dT%H:%M:%S',
 ]
 
 
@@ -55,7 +55,7 @@ class ConversionError(Exception):
 
 
 class Field(object):
-    def __init__(self, value_type, alias=None, default=None, create=True, ignore_dump=None, cast=None, **kwargs):
+    def __init__(self, value_type, alias=None, default=UNSET, create=True, ignore_dump=None, cast=None, **kwargs):
         # TODO: fix default bullshit
         self.true_type = value_type
         self.src_name = alias
@@ -64,21 +64,24 @@ class Field(object):
         self.cast = cast
         self.metadata = kwargs
 
-        if default is not None:
+        # Only set the default value if we where given one
+        if default is not UNSET:
             self.default = default
+        # Attempt to use the instances default type (e.g. from a subclass)
         elif not hasattr(self, 'default'):
-            self.default = None
+            self.default = UNSET
 
         self.deserializer = None
 
         if value_type:
             self.deserializer = self.type_to_deserializer(value_type)
 
-            if isinstance(self.deserializer, Field) and self.default is None:
+            if isinstance(self.deserializer, Field) and self.default is UNSET:
                 self.default = self.deserializer.default
             elif (inspect.isclass(self.deserializer) and
                     issubclass(self.deserializer, Model) and
-                    self.default is None and create):
+                    self.default is UNSET and
+                    create):
                 self.default = self.deserializer
 
     @property
@@ -94,7 +97,7 @@ class Field(object):
             self.src_name = name
 
     def has_default(self):
-        return self.default is not None
+        return self.default is not UNSET
 
     def try_convert(self, raw, client, **kwargs):
         try:
@@ -222,9 +225,7 @@ def text(obj):
     if six.PY2:
         if isinstance(obj, str):
             return obj.decode('utf-8')
-        return obj
-    else:
-        return str(obj)
+    return six.text_type(obj)
 
 
 def with_equality(field):
@@ -371,7 +372,7 @@ class Model(six.with_metaclass(ModelMeta, Chainable)):
             if isinstance(getattr(type(self), name), property):
                 try:
                     delattr(self, name)
-                except:
+                except Exception:
                     pass
 
     def to_dict(self, ignore=None):
@@ -409,7 +410,7 @@ class Model(six.with_metaclass(ModelMeta, Chainable)):
             for k, v in six.iteritems(data):
                 try:
                     setattr(item, k, v)
-                except:
+                except Exception:
                     pass
 
 
