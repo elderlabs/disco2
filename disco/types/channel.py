@@ -110,6 +110,8 @@ class Channel(SlottedModel, Permissible):
         The channel's position.
     bitrate : int
         The channel's bitrate.
+    user_limit : int
+        The channel's user limit.
     recipients: list(:class:`disco.types.user.User`)
         Members of this channel (if this is a DM channel).
     type : :const:`ChannelType`
@@ -124,6 +126,7 @@ class Channel(SlottedModel, Permissible):
     last_message_id = Field(snowflake)
     position = Field(int)
     bitrate = Field(int)
+    user_limit = Field(int)
     recipients = AutoDictField(User, 'id')
     nsfw = Field(bool)
     type = Field(enum(ChannelType))
@@ -159,18 +162,27 @@ class Channel(SlottedModel, Permissible):
         member = self.guild.get_member(user)
         base = self.guild.get_permissions(member)
 
-        ow_everyone = self.overwrites.get(self.guild_id)
-        if ow_everyone:
-            base += ow_everyone.compiled
+        # First grab and apply the everyone overwrite
+        everyone = self.overwrites.get(self.guild_id)
+        if everyone:
+            base -= everyone.deny
+            base += everyone.allow
 
+        denies = 0
+        allows = 0
         for role_id in member.roles:
-            ow_role = self.overwrites.get(role_id)
-            if ow_role:
-                base += ow_role.compiled
+            overwrite = self.overwrites.get(role_id)
+            if overwrite:
+                denies |= overwrite.deny
+                allows |= overwrite.allow
+
+        base -= denies
+        base += allows
 
         ow_member = self.overwrites.get(member.user.id)
         if ow_member:
-            base += ow_member.compiled
+            base -= ow_member.deny
+            base += ow_member.allow
 
         return base
 
@@ -197,7 +209,7 @@ class Channel(SlottedModel, Permissible):
         """
         Whether this channel is an NSFW channel.
         """
-        return self.type == ChannelType.GUILD_TEXT and (self.nsfw or NSFW_RE.match(self.name))
+        return bool(self.type == ChannelType.GUILD_TEXT and (self.nsfw or NSFW_RE.match(self.name)))
 
     @property
     def is_voice(self):
