@@ -6,7 +6,16 @@ from disco.util.sanitize import S
 # Regex which splits out argument parts
 PARTS_RE = re.compile(r'(\<|\[|\{)((?:\w+|\:|\||\.\.\.| (?:[0-9]+))+)(?:\>|\]|\})')
 
-BOOL_OPTS = {'yes': True, 'no': False, 'true': True, 'False': False, '1': True, '0': False}
+BOOL_OPTS = {
+    'yes': True,
+    'no': False,
+    'true': True,
+    'False': False,
+    '1': True,
+    '0': False,
+    'on': True,
+    'off': False,
+}
 
 # Mapping of types
 TYPE_MAP = {
@@ -193,7 +202,7 @@ class ArgumentSet(object):
                         raw[idx] = self.convert(ctx, arg.types, r)
                     except:
                         raise ArgumentError(u'cannot convert `{}` to `{}`'.format(
-                            S(r), ', '.join(arg.types)
+                            S(r), ', '.join(arg.types),
                         ))
 
             if arg.count == 1:
