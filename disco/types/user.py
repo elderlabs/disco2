@@ -58,7 +58,7 @@ GameType = Enum(
     DEFAULT=0,
     STREAMING=1,
     LISTENING=2,
-    WATCHING=3
+    WATCHING=3,
 )
 
 Status = Enum(
