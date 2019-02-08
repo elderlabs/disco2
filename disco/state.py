@@ -214,7 +214,7 @@ class State(object):
 
     def on_guild_delete(self, event):
         if event.id in self.guilds:
-            # Just delete the guild, channel references will fall
+            # Just delete the guild, channel references will fail
             del self.guilds[event.id]
 
         if event.id in self.voice_clients:

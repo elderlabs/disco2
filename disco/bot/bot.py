@@ -154,7 +154,7 @@ class Bot(LoggingClass):
             except ImportError:
                 self.log.warning('Failed to enable HTTP server, Flask is not installed')
             else:
-                self.log.info('Starting HTTP server bound to %s:%s', self.config.http_host, self.config.http_port)
+                self.log.info('Starting HTTP server bound to {}:{}'.format(self.config.http_host, self.config.http_port))
                 self.http = Flask('disco')
                 self.http_server = WSGIServer((self.config.http_host, self.config.http_port), self.http)
                 self.http_server_greenlet = gevent.spawn(self.http_server.serve_forever)
@@ -234,7 +234,7 @@ class Bot(LoggingClass):
         Computes all possible abbreviations for a command grouping.
         """
         # For the first pass, we just want to compute each groups possible
-        #  abbreviations that don't conflict with eachother.
+        #  abbreviations that don't conflict with each other.
         possible = {}
         for group in groups:
             for index in range(1, len(group)):
@@ -244,7 +244,7 @@ class Bot(LoggingClass):
                 else:
                     possible[current] = group
 
-        # Now, we want to compute the actual shortest abbreivation out of the
+        # Now, we want to compute the actual shortest abbreviation out of the
         #  possible ones
         result = {}
         for abbrev, group in six.iteritems(possible):
@@ -449,7 +449,7 @@ class Bot(LoggingClass):
             inst = inst(self, config)
 
         if inst.__class__.__name__ in self.plugins:
-            self.log.warning('Attempted to add already added plugin %s', inst.__class__.__name__)
+            self.log.warning('Attempted to add already added plugin {}'.format(inst.__class__.__name__))
             raise Exception('Cannot add already added plugin: {}'.format(inst.__class__.__name__))
 
         self.ctx['plugin'] = self.plugins[inst.__class__.__name__] = inst
@@ -467,7 +467,7 @@ class Bot(LoggingClass):
             Plugin class to unload and remove.
         """
         if cls.__name__ not in self.plugins:
-            raise Exception('Cannot remove non-existant plugin: {}'.format(cls.__name__))
+            raise Exception('Cannot remove non-existent plugin: {}'.format(cls.__name__))
 
         ctx = {}
         self.plugins[cls.__name__].unload(ctx)
@@ -495,7 +495,7 @@ class Bot(LoggingClass):
         """
         Adds and loads a plugin, based on its module path.
         """
-        self.log.info('Adding plugin module at path "%s"', path)
+        self.log.info('Adding plugin module at path "{}"'.format(path))
         mod = importlib.import_module(path)
         loaded = False
 

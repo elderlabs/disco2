@@ -15,7 +15,7 @@ from disco.bot.command import Command, CommandError
 class BasePluginDeco(object):
     Prio = Priority
 
-    # TODO: dont smash class methods
+    # TODO: don't smash class methods
     @classmethod
     def add_meta_deco(cls, meta):
         def deco(f):
@@ -182,7 +182,7 @@ class Plugin(LoggingClass, PluginDeco):
         self.storage = bot.storage
         self.config = config
 
-        # General declartions
+        # General declarations
         self.listeners = []
         self.commands = []
         self.schedules = {}
@@ -393,7 +393,7 @@ class Plugin(LoggingClass, PluginDeco):
         repeat : bool
             Whether this schedule is repeating (or one time).
         init : bool
-            Whether to run this schedule once immediatly, or wait for the first
+            Whether to run this schedule once immediately, or wait for the first
             scheduled iteration.
         kwargs: dict
             kwargs which will be passed to executed `func`

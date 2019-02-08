@@ -75,7 +75,7 @@ class GuildEmoji(Emoji):
 
     @property
     def url(self):
-        return 'https://discordapp.com/api/emojis/{}.{}'.format(self.id, 'gif' if self.animated else 'png')
+        return 'https://media.discordapp.net/emojis/{}.{}'.format(self.id, 'gif' if self.animated else 'png')
 
     @cached_property
     def guild(self):
@@ -502,13 +502,13 @@ class Guild(SlottedModel, Permissible):
         if not self.icon:
             return ''
 
-        return 'https://cdn.discordapp.com/icons/{}/{}.{}?size={}'.format(self.id, self.icon, fmt, size)
+        return 'https://media.discordapp.net/icons/{}/{}.{}?size={}'.format(self.id, self.icon, fmt, size)
 
     def get_splash_url(self, fmt='webp', size=1024):
         if not self.splash:
             return ''
 
-        return 'https://cdn.discordapp.com/splashes/{}/{}.{}?size={}'.format(self.id, self.splash, fmt, size)
+        return 'https://media.discordapp.net/splashes/{}/{}.{}?size={}'.format(self.id, self.splash, fmt, size)
 
     @property
     def icon_url(self):

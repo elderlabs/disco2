@@ -75,7 +75,7 @@ class GatewayClient(LoggingClass):
         return self._send(op, data)
 
     def _send(self, op, data):
-        self.log.debug('GatewayClient.send %s', op)
+        self.log.debug('GatewayClient.send {}'.format(op))
         self.packets.emit((SEND, op), data)
         self.ws.send(self.encoder.encode({
             'op': op.value,
@@ -96,7 +96,7 @@ class GatewayClient(LoggingClass):
 
     def handle_dispatch(self, packet):
         obj = GatewayEvent.from_dispatch(self.client, packet)
-        self.log.debug('GatewayClient.handle_dispatch %s', obj.__class__.__name__)
+        self.log.debug('GatewayClient.handle_dispatch {}'.format(obj.__class__.__name__))
         self.client.events.emit(obj.__class__.__name__, obj)
         if self.replaying:
             self.replayed_events += 1
@@ -119,7 +119,7 @@ class GatewayClient(LoggingClass):
         self.ws.close()
 
     def handle_hello(self, packet):
-        self.log.info('Received HELLO, starting heartbeater...')
+        self.log.info('Received HELLO, starting heartbeat...')
         self._heartbeat_task = gevent.spawn(self.heartbeat_task, packet['d']['heartbeat_interval'])
 
     def on_ready(self, ready):
@@ -128,7 +128,7 @@ class GatewayClient(LoggingClass):
         self.reconnects = 0
 
     def on_resumed(self, _):
-        self.log.info('RESUME completed, replayed %s events', self.replayed_events)
+        self.log.info('RESUME completed, replayed {} events'.format(self.replayed_events))
         self.reconnects = 0
         self.replaying = False
 
@@ -144,7 +144,7 @@ class GatewayClient(LoggingClass):
         if self.zlib_stream_enabled:
             gateway_url += '&compress=zlib-stream'
 
-        self.log.info('Opening websocket connection to URL `%s`', gateway_url)
+        self.log.info('Opening websocket connection to URL `{}`'.format(gateway_url))
         self.ws = Websocket(gateway_url)
         self.ws.emitter.on('on_open', self.on_open)
         self.ws.emitter.on('on_error', self.on_error)
@@ -194,14 +194,14 @@ class GatewayClient(LoggingClass):
         if isinstance(error, KeyboardInterrupt):
             self.shutting_down = True
             self.ws_event.set()
-        raise Exception('WS recieved error: %s', error)
+        raise Exception('WS recieved error: {}'.format(error))
 
     def on_open(self):
         if self.zlib_stream_enabled:
             self._zlib = zlib.decompressobj()
 
         if self.seq and self.session_id:
-            self.log.info('WS Opened: attempting resume w/ SID: %s SEQ: %s', self.session_id, self.seq)
+            self.log.info('WS Opened: attempting resume w/ SID: {} SEQ: {}'.format(self.session_id, self.seq))
             self.replaying = True
             self.send(OPCode.RESUME, {
                 'token': self.client.config.token,
@@ -230,7 +230,7 @@ class GatewayClient(LoggingClass):
         # Make sure we cleanup any old data
         self._buffer = None
 
-        # Kill heartbeater, a reconnect/resume will trigger a HELLO which will
+        # Kill heartbeat, a reconnect/resume will trigger a HELLO which will
         #  respawn it
         if self._heartbeat_task:
             self._heartbeat_task.kill()
@@ -244,7 +244,7 @@ class GatewayClient(LoggingClass):
 
         # Track reconnect attempts
         self.reconnects += 1
-        self.log.info('WS Closed: [%s] %s (%s)', code, reason, self.reconnects)
+        self.log.info('WS Closed: [{}] {} ({})'.format(code, reason, self.reconnects))
 
         if self.max_reconnects and self.reconnects > self.max_reconnects:
             raise Exception('Failed to reconnect after {} attempts, giving up'.format(self.max_reconnects))
@@ -254,7 +254,7 @@ class GatewayClient(LoggingClass):
             self.session_id = None
 
         wait_time = self.reconnects * 5
-        self.log.info('Will attempt to %s after %s seconds', 'resume' if self.session_id else 'reconnect', wait_time)
+        self.log.info('Will attempt to {} after {} seconds'.format('resume' if self.session_id else 'reconnect', wait_time))
         gevent.sleep(wait_time)
 
         # Reconnect

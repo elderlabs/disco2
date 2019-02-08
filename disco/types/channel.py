@@ -448,21 +448,21 @@ class Channel(SlottedModel, Permissible):
         """
         Sets the channels bitrate.
         """
-        assert (self.is_voice)
+        assert self.is_voice
         return self.client.api.channels_modify(self.id, bitrate=bitrate, reason=reason)
 
     def set_user_limit(self, user_limit, reason=None):
         """
         Sets the channels user limit.
         """
-        assert (self.is_voice)
+        assert self.is_voice
         return self.client.api.channels_modify(self.id, user_limit=user_limit, reason=reason)
 
     def set_parent(self, parent, reason=None):
         """
         Sets the channels parent.
         """
-        assert (self.is_guild)
+        assert self.is_guild
         return self.client.api.channels_modify(
             self.id,
             parent_id=to_snowflake(parent) if parent else parent,

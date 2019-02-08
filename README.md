@@ -1,7 +1,5 @@
-# Don't use this master branch, use [this one](https://github.com/elderlabs/disco/tree/530a79f) instead. 
-**Don't ask why, but bugs, so branch 530a79f is maintained.**
-
-# disco
+# Disco
+Use [branch 530a79f](https://github.com/elderlabs/disco/tree/530a79f)  if you're running Rowboat with Python 2. 
 
 [![PyPI](https://img.shields.io/pypi/l/disco-py.svg)](https://pypi.python.org/pypi/disco-py/)
 [![PyPI](https://img.shields.io/pypi/v/disco-py.svg)](https://pypi.python.org/pypi/disco-py/)

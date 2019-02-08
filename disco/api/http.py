@@ -264,11 +264,11 @@ class HTTPClient(LoggingClass):
         # Possibly wait if we're rate limited
         response.rate_limited_duration = self.limiter.check(bucket)
 
-        self.log.debug('KW: %s', kwargs)
+        self.log.debug('KW: {}'.format(kwargs))
 
         # Make the actual request
         url = self.BASE_URL + route[1].format(**args)
-        self.log.info('%s %s (%s)', route[0].value, url, kwargs.get('params'))
+        self.log.info('{} {} ({})'.format(route[0].value, url, kwargs.get('params')))
         r = self.session.request(route[0].value, url, **kwargs)
 
         if self.after_request:
@@ -282,7 +282,7 @@ class HTTPClient(LoggingClass):
         if r.status_code < 400:
             return r
         elif r.status_code != 429 and 400 <= r.status_code < 500:
-            self.log.warning('Request failed with code %s: %s', r.status_code, r.content)
+            self.log.warning('Request failed with code {}: {}'.format(r.status_code, r.content))
             response.exception = APIException(r)
             raise response.exception
         else:

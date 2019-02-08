@@ -103,7 +103,7 @@ def disco_main(run=False):
     if run:
         (bot or client).run_forever()
 
-    return (bot or client)
+    return bot or client
 
 
 if __name__ == '__main__':

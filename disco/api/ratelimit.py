@@ -99,7 +99,7 @@ class RouteState(LoggingClass):
 
         self.event = gevent.event.Event()
         delay = (self.reset_time - time.time()) + .5
-        self.log.debug('Cooling down bucket %s for %s seconds', self, delay)
+        self.log.debug('Cooling down bucket {} for {} seconds'.format(self, delay))
         gevent.sleep(delay)
         self.event.set()
         self.event = None
