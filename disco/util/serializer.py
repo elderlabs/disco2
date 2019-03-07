@@ -31,6 +31,7 @@ class Serializer(object):
 
     @classmethod
     def loads(cls, fmt, raw):
+        import yaml
         loads, _ = getattr(cls, fmt)()
         return loads(raw, Loader=yaml.FullLoader)
 
